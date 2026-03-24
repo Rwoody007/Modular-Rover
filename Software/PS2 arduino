@@ -1,0 +1,93 @@
+#include <PS2X_lib.h>
+
+PS2X ps2x;
+
+#define MODE_SWITCH 2
+
+#define LEFT_PWM 5
+#define LEFT_DIR 4
+#define RIGHT_PWM 6
+#define RIGHT_DIR 7
+
+#define THROTTLE_PIN A0
+#define STEERING_PIN A1
+
+bool remoteMode = false;
+
+void setup() {
+
+  pinMode(MODE_SWITCH, INPUT_PULLUP);
+
+  pinMode(LEFT_PWM, OUTPUT);
+  pinMode(LEFT_DIR, OUTPUT);
+  pinMode(RIGHT_PWM, OUTPUT);
+  pinMode(RIGHT_DIR, OUTPUT);
+
+  Serial.begin(9600);
+
+  ps2x.config_gamepad(13,11,10,12);
+}
+
+void loop() {
+
+  remoteMode = digitalRead(MODE_SWITCH) == LOW;
+
+  if(remoteMode)
+  {
+    remoteControl();
+  }
+  else
+  {
+    manualControl();
+  }
+}
+
+void manualControl()
+{
+  int throttle = analogRead(THROTTLE_PIN);
+  int steering = analogRead(STEERING_PIN);
+
+  int speed = map(throttle,0,1023,-255,255);
+  int turn  = map(steering,0,1023,-255,255);
+
+  drive(speed,turn);
+}
+
+void remoteControl()
+{
+  ps2x.read_gamepad(false,0);
+
+  int y = ps2x.Analog(PSS_LY);
+  int x = ps2x.Analog(PSS_LX);
+
+  int speed = map(y,0,255,255,-255);
+  int turn  = map(x,0,255,-255,255);
+
+  drive(speed,turn);
+}
+
+void drive(int speed, int turn)
+{
+  int left  = speed + turn;
+  int right = speed - turn;
+
+  left  = constrain(left,-255,255);
+  right = constrain(right,-255,255);
+
+  setMotor(LEFT_PWM,LEFT_DIR,left);
+  setMotor(RIGHT_PWM,RIGHT_DIR,right);
+}
+
+void setMotor(int pwmPin,int dirPin,int speed)
+{
+  if(speed >= 0)
+  {
+    digitalWrite(dirPin,HIGH);
+    analogWrite(pwmPin,speed);
+  }
+  else
+  {
+    digitalWrite(dirPin,LOW);
+    analogWrite(pwmPin,-speed);
+  }
+}
