@@ -1,0 +1,18 @@
+Arduino            STP-DRV-4850 Driver
+
+5V  ────────────── (optional EN+)
+GND ────────────── STEP-
+GND ────────────── DIR-
+GND ────────────── EN-
+
+D8  ────────────── STEP+
+D9  ────────────── DIR+
+D10 ────────────── EN+   (optional)
+
+External Power Supply (24–48V)
++V  ────────────── V+
+GND ────────────── V-
+
+Stepper Motor
+Coil 1 ─────────── A+ / A-
+Coil 2 ─────────── B+ / B-
